@@ -1,0 +1,5 @@
+pygame
+math
+subprocess
+os
+sys
