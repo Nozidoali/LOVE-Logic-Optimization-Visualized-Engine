@@ -12,16 +12,16 @@ class Edge(object):
         # figure out the position:
         lower_x, lower_y = self.lower_node.position
         lower_node_pos = [
-            lower_x,  lower_y-node_size*1.5,
+            lower_x,  lower_y-node_size*1.75,
         ]
         higher_x, higher_y = self.higher_node.position
         if self.pin_index == 1:
             higher_node_pos = [
-                higher_x-node_size/2,  higher_y+node_size*1.5,
+                higher_x-node_size/2,  higher_y+node_size*1.75,
             ]
         elif self.pin_index == 2:
             higher_node_pos = [
-                higher_x+node_size/2,  higher_y+node_size*1.5,
+                higher_x+node_size/2,  higher_y+node_size*1.75,
             ]
         else:
             return

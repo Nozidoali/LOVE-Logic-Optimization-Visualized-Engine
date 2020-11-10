@@ -1,5 +1,6 @@
 from src.text_box import *
 from src.graph_box import *
+from src.count_box import *
 from src.button import *
 from src.mouse_cursor import *
 from src.opt_engine import *
@@ -16,12 +17,24 @@ class UI(object):
             - network graphbox
         '''
         pygame.init()
-        infoObject = pygame.display.Info()
-        self.size = infoObject.current_w, infoObject.current_h
+
+        root = tk.Tk()
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        self.size = screen_width, screen_height
+
+        #infoObject = pygame.display.Info()
+        #self.size = infoObject.current_w, infoObject.current_h
+
         self.version = version
-        self.screen = pygame.display.set_mode(self.size, flags=pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode(self.size, flags = pygame.FULLSCREEN)
         self.background = pygame.image.load(background)
         pygame.display.set_caption('VE450 Demo: {0}'.format(self.version))
+        """
+        background = pygame.Surface(self.size)
+        self.background = background.convert()
+        self.background.fill(SB)
+        """
 
         # objects
         self.objects = []
@@ -34,6 +47,7 @@ class UI(object):
             3. Button  
             4. Mouse Cursor  
             5. Optimizer  
+            6. Count Box
         '''
         self.objects.append(obj)
     
@@ -96,8 +110,37 @@ class UI(object):
                     graph_box.write_blif('{}/curr.blif'.format(optimizer.directory))
                     # run optimize
                     optimizer.run('compress2rs')
+                    # clear area
+                    graph_box.area = 0
                     # read the result
                     graph_box.read_blif('{}/curr.blif'.format(optimizer.directory))
+
+        #SIG_CLR
+        if command[0] == SIG_CLR:
+            graph_box = self.get_graph_box()
+            if graph_box is not None:
+                # clear all nodes and connections
+                graph_box.clear()
+        
+        #SIG_AND
+        if command[0] == SIG_AND:
+            graph_box = self.get_graph_box()
+            graph_box.node_type = NT_AND
+
+        #SIG_LEN
+        if command[0] == SIG_LEN:
+            graph_box = self.get_graph_box()
+            graph_box.node_type = NT_LN
+
+        #SIG_RIN
+        if command[0] == SIG_RIN:
+            graph_box = self.get_graph_box()
+            graph_box.node_type = NT_RN
+
+        #SIG_LRN
+        if command[0] == SIG_LRN:
+            graph_box = self.get_graph_box()
+            graph_box.node_type = NT_LRN
                 
     def get_signal(self):
         '''
@@ -187,4 +230,4 @@ class UI(object):
         while(True):
             signal = self.get_signal()
             self.parse_command(signal)
-            self.paint()            
+            self.paint()         

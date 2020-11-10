@@ -1,19 +1,24 @@
 from src.node import *
 from src.edge import *
-
+import pygame.gfxdraw
 
 class Graph_box:
     def __init__(self, left, top, width, height):
         # get the window DPI and set the size of box
+        root = tk.Tk()
+        self.screen_width = root.winfo_screenwidth()
+        self.screen_height = root.winfo_screenheight()
+        """
         infoObject = pygame.display.Info()
         screen_width = infoObject.current_w
         screen_height = infoObject.current_h
+        """
         
         # initialize the window:
-        self.width = width if type(width) is int else int(screen_width*width)
-        self.height = height if type(height) is int else int(screen_height*height)       
-        self.left = left if type(left) is int else int(screen_width*left)       
-        self.top = top if type(top) is int else int(screen_height*top)
+        self.width = width if type(width) is int else int(self.screen_width*width)
+        self.height = height if type(height) is int else int(self.screen_height*height)       
+        self.left = left if type(left) is int else int(self.screen_width*left)       
+        self.top = top if type(top) is int else int(self.screen_height*top)
         self.position = self.left, self.top
         
         self.max_level = 10
@@ -23,20 +28,52 @@ class Graph_box:
         self.endanger_node = None
         self.model_name = 'example'
         self.type = TYPE_GRAPH_BOX
+        self.grid_memory = []
+
+        self.node_type = NT_AND
         
         # nodes 
         self.nodes = []
         # connnections
         self.connnections = []
 
+    def get_area(self):
+        return self.area
+
     def on_key_down(self, key):
         return SIG_SYS_QUIT, None
 
 
     def paint(self, screen):
+        """
         # paint background
-        pygame.draw.rect(screen, BLACK, Rect(
+        pygame.draw.rect(screen, BY, Rect(
             self.left-10, self.top-10, self.width+20, self.height+20))
+        """
+        # paint background of multiple colors
+        pygame.gfxdraw.box(screen, pygame.Rect(
+            0, 0, self.left - 10, self.screen_height), BB)
+
+        pygame.gfxdraw.box(screen, pygame.Rect(
+            self.left - 10, 0, self.width + 20, self.screen_height), BC)
+
+        pygame.gfxdraw.box(screen, pygame.Rect(
+            self.left + self.width + 10, 0, self.screen_width - (self.left + self.width + 20), self.screen_height), SB)
+
+        # paint borders
+        leg1_start, leg1_end = [
+            (self.left - 10, 0),
+            (self.left - 10, self.screen_height),
+        ]
+        pygame.draw.line(screen, GRAY, leg1_start, leg1_end, 2)
+
+        leg2_start, leg2_end = [
+            (self.left + self.width + 10, 0),
+            (self.left + self.width + 10, self.screen_height),
+        ]
+        pygame.draw.line(screen, GRAY, leg2_start, leg2_end, 2)
+        
+
         # paint grid
         grid_size = int(self.height/self.max_level)
         grid_width = int(self.width/grid_size)
@@ -46,22 +83,39 @@ class Graph_box:
                 (self.left, self.top+_*grid_size),
                 (self.left+self.width, self.top+_*grid_size)
             ]
-            pygame.draw.line(screen, DARK_GRAY, start, end, 1)
+            pygame.draw.line(screen, GRAY, start, end, 2)
         for _ in range(grid_width+1):
             start, end = [
                 (self.left+_*grid_size, self.top),
                 (self.left+_*grid_size, self.top+self.height)
             ]
-            pygame.draw.line(screen, DARK_GRAY, start, end, 1)
+            pygame.draw.line(screen, GRAY, start, end, 2)
+        """
         # paint boundary
-        pygame.draw.rect(screen, PINK, Rect(
-            self.left-10, self.top-10, self.width+20, self.height+20), 3)
+        pygame.draw.rect(screen, GRAY, Rect(
+            self.left-10, self.top-10, self.width+20, self.height+20), 1)
+        """
         # paint nodes
         for node in self.nodes:
             node.paint(screen, self.node_size)
         # paint connections
         for connection in self.connnections:
             connection.paint(screen, self.node_size)
+        # paint count board
+        #pygame.draw.rect(screen, BB, Rect(
+        #    self.left + self.width + 200, self.top - 10, 150, 200))
+        pygame.gfxdraw.rectangle(screen, Rect(
+            self.left + self.width + 350, self.top - 10, 350, 300),BB)
+        font_size = int(self.height*0.1)
+        font1 = pygame.font.SysFont('comicsansms', font_size)
+        font2 = pygame.font.SysFont('comicsansms', font_size*2)
+        text_rect1 = font2.render('{0}'.format(self.area), True, WHITE, None)
+        position1 = self.left+self.width+453, self.top-35
+        text_rect2 = font1.render('Nodes', True, WHITE, None)
+        position2 = self.left+self.width+383, self.top+155
+        screen.blit(text_rect1, position1)
+        screen.blit(text_rect2, position2)
+
 
     def zoom_in(self):
         if self.max_level == 10:
@@ -97,8 +151,10 @@ class Graph_box:
         node = Node(
             name = 'node{0}'.format(self.area),
             radius = self.node_size,
-            position = position
+            position = position,
+            node_type = self.node_type
         )
+
         self.nodes.append(node)
         self.area += 1
         return node
@@ -151,22 +207,27 @@ class Graph_box:
             if edge.pin_index == 2:
                 edge.higher_node.fanin_right = None
 
-    def assign_level(self, node, current_level):
+    def assign_level(self, node):
         # if reached the leaf
         if node.logic is None:
-            node.level = current_level
-            return current_level
-        return max(
-            self.assign_level(node.fanin_left,  current_level+1),
-            self.assign_level(node.fanin_right, current_level+1)
+            node.level = 0
+            return 0
+        node.level = max(
+            self.assign_level(node.fanin_left),
+            self.assign_level(node.fanin_right)
         )
+        return node.level
     def assign_grid_position(self, node, current_location):
         x, y = current_location
         grid_size = int(self.height/self.max_level)
+        if (x, y) in self.grid_memory:
+            self.assign_grid_position(node, [x+1,y])
+            return
         node.position = node.x, node.y = [
             x*grid_size+self.left,
             y*grid_size+self.top
         ]
+        self.grid_memory.append( (x, y) )
         if node.fanin_left is not None:
             self.assign_grid_position(node.fanin_left, [x-1,y+1])
         if node.fanin_left is not None:
@@ -211,6 +272,14 @@ class Graph_box:
                     nodes[output] = self.add_empty_node()
                 # should be <0/1><0/1> 1
                 nodes[output].logic = [ int(_) for _ in file.readline()[0] ]
+                if nodes[output].logic is [1,1]:
+                    nodes[output].node_type = NT_AND
+                if nodes[output].logic is [0,1]:
+                    nodes[output].node_type = NT_LN
+                if nodes[output].logic is [1,0]:
+                    nodes[output].node_type = NT_RN
+                if nodes[output].logic is [0,0]:
+                    nodes[output].node_type = NT_LRN
         # second run: initialize all the connections
         file.seek(0)
         while True:
@@ -234,16 +303,20 @@ class Graph_box:
                 continue
         file.close()
         # zoom to be able to host all the nodes
-        if len(outputs) == 1:
-            root = nodes[outputs[0]]
-            graph_level = self.assign_level(root, 1)
-            self.max_level = max(6, graph_level+2)
-            grid_size   = int(self.height/self.max_level)
-            grid_width  = int(self.width/grid_size)
-            grid_height = int(self.height/grid_size)
+        graph_level = 0
+        for output in outputs:
+            root = nodes[output]
+            graph_level = max(graph_level, self.assign_level(root))
+        self.max_level = max(6, graph_level+2)
+        grid_size   = int(self.height/self.max_level)
+        grid_width  = int(self.width/grid_size)
+        grid_height = int(self.height/grid_size)
+
+        # assign position
+        self.grid_memory = []
+        for output in outputs:
+            root = nodes[output]
             self.assign_grid_position(root, [round(grid_width/2), 1]) # in the middle of first row
-        else:
-            raise NotImplementedError
         
     def write_blif(self, filename):
         file = open(filename,'w')
@@ -271,9 +344,22 @@ class Graph_box:
                 + node.fanin_left.name + ' '
                 + node.fanin_right.name + ' '
                 + node.name, file=file)
-            print('11 1', file=file)
+            if node.node_type is NT_AND:
+                print('11 1', file=file)
+            if node.node_type is NT_LN:
+                print('01 1', file=file)
+            if node.node_type is NT_RN:
+                print('10 1', file=file)
+            if node.node_type is NT_LRN:
+                print('00 1', file=file)
         print('.end', file=file)
         file.close()
+
+    def clear(self):
+        # clear all nodes and connections
+        self.nodes = []
+        self.connnections = []
+        self.area = 0
 
     def is_over(self, position):
         x, y = position

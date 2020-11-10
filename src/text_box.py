@@ -3,14 +3,19 @@ from src.global_definition import *
 class Text_box:
     def __init__(self, left, top, width, height):
         # get the window DPI and set the size of box
+        root = tk.Tk()
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        """
         infoObject = pygame.display.Info()
         screen_width = infoObject.current_w
         screen_height = infoObject.current_h
+        """
         
         # initialize the window:
-        self.width = width if type(width) is int else int(screen_width*width)
+        self.width = width if type(width) is int else int(screen_width*width) +20
         self.height = height if type(height) is int else int(screen_height*height)       
-        self.left = left if type(left) is int else int(screen_width*left)       
+        self.left = left if type(left) is int else int(screen_width*left)- 20      
         self.top = top if type(top) is int else int(screen_height*top)
         self.position = self.left, self.top
         
@@ -51,13 +56,15 @@ class Text_box:
         '''
         paint the object
         '''
-        font_size = math.floor(self.height/self.max_line)
-        pygame.draw.rect(screen, C, Rect(
-            self.left-10, self.top-10, self.width+20, self.height+20), 3)
+        font_size = math.floor((self.height-50)/(self.max_line))
+        pygame.draw.rect(screen, GRAY, Rect(
+            self.left-10, self.top-10, self.width+20, self.height+20), 2)
         offset = 0
         line_number = 0
         # paint all the text
-        font = pygame.font.SysFont('comicsansms', font_size)
+        font = pygame.font.SysFont('rachana', font_size)
+        #font.set_bold(True)
+        
         for text in self.text_buffer:
             text_rect = font.render('[{0}]  '.format(
                 line_number)+text, True, C, None)
