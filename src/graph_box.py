@@ -116,36 +116,27 @@ class Graph_box:
         screen.blit(text_rect1, position1)
         screen.blit(text_rect2, position2)
 
+    def zoom_to(self, level):
+        old_grid_size = max(1,int(self.height/self.max_level))
+        self.max_level = level
+        self.node_size = int(self.height/self.max_level)/3
+        new_grid_size = max(1,int(self.height/self.max_level))
+        # round it to the closest grid point
+        for node in self.nodes:
+            x, y = node.position
+            grid_position = [
+                round((x-self.left)/old_grid_size)*new_grid_size+self.left,
+                round((y-self.top)/old_grid_size)*new_grid_size+self.top
+            ]
+            node.position = grid_position
 
     def zoom_in(self):
-        if self.max_level == 10:
+        if self.max_level == 0:
             return
-        self.max_level -= 1
-        self.node_size = int(self.height/self.max_level)/3
-        grid_size = int(self.height/self.max_level)
-        # round it to the closest grid point
-        for node in self.nodes:
-            x, y = node.position
-            grid_position = [
-                round((x-self.left)/grid_size)*grid_size+self.left,
-                round((y-self.top)/grid_size)*grid_size+self.top
-            ]
-            node.position = grid_position
+        self.zoom_to(self.max_level-1)
 
     def zoom_out(self):
-        if self.max_level == 50:
-            return
-        self.max_level += 1
-        self.node_size = int(self.height/self.max_level)/3
-        grid_size = int(self.height/self.max_level)
-        # round it to the closest grid point
-        for node in self.nodes:
-            x, y = node.position
-            grid_position = [
-                round((x-self.left)/grid_size)*grid_size+self.left,
-                round((y-self.top)/grid_size)*grid_size+self.top
-            ]
-            node.position = grid_position
+        self.zoom_to(self.max_level+1)
 
     def add_node(self, position):
         node = Node(
@@ -219,9 +210,12 @@ class Graph_box:
         return node.level
     def assign_grid_position(self, node, current_location):
         x, y = current_location
+        # adjust the level if necessary
+        if y > self.max_level:
+            self.zoom_to(y)
         grid_size = int(self.height/self.max_level)
         if (x, y) in self.grid_memory:
-            self.assign_grid_position(node, [x+1,y])
+            self.assign_grid_position(node, [x,y+1])
             return
         node.position = node.x, node.y = [
             x*grid_size+self.left,
