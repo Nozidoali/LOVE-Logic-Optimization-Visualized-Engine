@@ -34,11 +34,11 @@ class Node(object):
         x, y = self.position
         # priority: red > white > gray
         if self.endanger is True:
-            color = RED
+            color = COLOR_NODE_ENDANGER
         elif self.highlight is True:
-            color = WHITE
+            color = COLOR_NODE_HIGHLIGHT
         else:
-            color = GRAY
+            color = COLOR_NODE_NORMAL
         # paint input
         if self.fanin_left == None and self.fanin_right == None:
             pygame.draw.arc(screen, color, [x-node_size,y-node_size,node_size*2,node_size*2], 1.57*0, 1.57*2, 2)

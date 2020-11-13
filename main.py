@@ -7,7 +7,8 @@ if __name__ == '__main__':
     # you need to define your UI
     ui = UI(
         background='img/background.jpg',
-        version='3.0'
+        version='3.0',
+        fullscreen=False
     )
 
     # Add a monitor

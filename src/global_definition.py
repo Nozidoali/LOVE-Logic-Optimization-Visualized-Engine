@@ -5,6 +5,7 @@ import os
 import sys
 from pygame.locals import *
 import tkinter as tk
+import queue 
 
 WHITE =         (255,   255,    255)
 GRAY =          (128,   128,    128)
@@ -71,7 +72,18 @@ TYPE_COUNT_BOX = 5
 '''
     node types
 '''
-NT_AND = 0
-NT_LN = 1
-NT_RN = 2
-NT_LRN = 3
+NT_AND  = 0
+NT_LN   = 1
+NT_RN   = 2
+NT_LRN  = 3
+
+'''
+    color theme
+'''
+COLOR_EDGE_HIGHLIGHT =  [255, 255, 255]
+COLOR_EDGE_ENDANGER =   [255,   0,   0]
+COLOR_EDGE_NORMAL =     [100, 100, 100]
+
+COLOR_NODE_HIGHLIGHT =  [255, 255, 255]
+COLOR_NODE_ENDANGER =   [255,   0,   0]
+COLOR_NODE_NORMAL =     [200, 200, 200]

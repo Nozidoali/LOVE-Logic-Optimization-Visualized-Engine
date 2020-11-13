@@ -6,8 +6,7 @@ from src.mouse_cursor import *
 from src.opt_engine import *
 
 class UI(object):
-    def __init__(self, background='img/background.jpg', version='unknown'
-                    ):
+    def __init__(self, background='img/background.jpg', version='unknown', fullscreen=True):
         '''
         1. initialize the screen
         2. set the width and hight
@@ -27,7 +26,7 @@ class UI(object):
         #self.size = infoObject.current_w, infoObject.current_h
 
         self.version = version
-        self.screen = pygame.display.set_mode(self.size, flags = pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode(self.size, flags = pygame.FULLSCREEN) if fullscreen else pygame.display.set_mode(self.size)
         self.background = pygame.image.load(background)
         pygame.display.set_caption('VE450 Demo: {0}'.format(self.version))
         """

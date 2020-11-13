@@ -27,9 +27,9 @@ class Edge(object):
             return
         # priority: red > white > gray
         if self.endanger is True:
-            color = RED
+            color = COLOR_EDGE_ENDANGER
         elif self.highlight is True:
-            color = WHITE
+            color = COLOR_EDGE_HIGHLIGHT
         else:
-            color = GRAY
+            color = COLOR_EDGE_NORMAL
         pygame.draw.line(screen, color, lower_node_pos, higher_node_pos, 1)

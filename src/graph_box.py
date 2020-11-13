@@ -95,12 +95,13 @@ class Graph_box:
         pygame.draw.rect(screen, GRAY, Rect(
             self.left-10, self.top-10, self.width+20, self.height+20), 1)
         """
-        # paint nodes
-        for node in self.nodes:
-            node.paint(screen, self.node_size)
         # paint connections
         for connection in self.connnections:
             connection.paint(screen, self.node_size)
+        # paint nodes
+        for node in self.nodes:
+            node.paint(screen, self.node_size)
+
         # paint count board
         #pygame.draw.rect(screen, BB, Rect(
         #    self.left + self.width + 200, self.top - 10, 150, 200))
@@ -209,19 +210,52 @@ class Graph_box:
         )
         return node.level
     def assign_grid_position(self, node, current_location):
+        '''
+            find an empty place to store this node which is 
+            the closest to current location
+        '''
+        # use BFS to find the next position
+        queue_of_points = queue.Queue() 
+        queue_of_points.put(current_location)
         x, y = current_location
+        while queue_of_points.empty() is False:
+            point = x, y = queue_of_points.get()
+            # if an empty point is found
+            if point not in self.grid_memory:
+                self.grid_memory.append( point )
+                break
+            '''
+                Don't change the sequence here. If all of the surroundings are empty:
+                    1. Down
+                    2. Right
+                    3. Left
+                    4. Up
+            '''
+            if True:    # no restrictions on y max value
+                if [x,y+1] not in self.grid_memory:
+                    queue_of_points.put([x,y+1])
+            if True:    # no restrictions on x max value
+                if [x+1,y] not in self.grid_memory:
+                    queue_of_points.put([x+1,y])
+            if x > 1:   # x should be positive
+                if [x-1,y] not in self.grid_memory:
+                    queue_of_points.put([x-1,y])
+            if y > 1:   # y should be positive
+                if [x,y-1] not in self.grid_memory:
+                    queue_of_points.put([x,y-1])
         # adjust the level if necessary
         if y > self.max_level:
             self.zoom_to(y)
+        if x > self.max_level:
+            self.zoom_to(x)
+        '''
+            set the value to the attributes and run the recursion
+        '''
         grid_size = int(self.height/self.max_level)
-        if (x, y) in self.grid_memory:
-            self.assign_grid_position(node, [x,y+1])
-            return
         node.position = node.x, node.y = [
             x*grid_size+self.left,
             y*grid_size+self.top
         ]
-        self.grid_memory.append( (x, y) )
         if node.fanin_left is not None:
             self.assign_grid_position(node.fanin_left, [x-1,y+1])
         if node.fanin_left is not None:
