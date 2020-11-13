@@ -291,23 +291,34 @@ class Graph_box:
             if line[0] == '.model':
                 self.model_name = line[1]
             if line[0] == '.names':
-                left, right, output = line[1:]
-                if left not in nodes:
-                    nodes[left] = self.add_empty_node()
-                if right not in nodes:
-                    nodes[right] = self.add_empty_node()
-                if output not in nodes:
-                    nodes[output] = self.add_empty_node()
+                output = line[-1]
+                # ignore the constants
+                if len(line[1:]) is 1:
+                    pass
+                # add definition of node names
+                if len(line[1:]) is 2 or len(line[1:]) is 3:
+                    for node_name in line[1:]:
+                        if node_name not in nodes:
+                            nodes[node_name] = self.add_empty_node()
+                if len(line[1:]) is 1:
+                    pass
+                if len(line[1:]) is 2:
+                    nodes[output].logic = [ int(_) for _ in file.readline()[0] ]
+                    if nodes[output].logic is [1]:
+                        nodes[output].node_type = NT_AND
+                    if nodes[output].logic is [0]:
+                        nodes[output].node_type = NT_LRN
                 # should be <0/1><0/1> 1
-                nodes[output].logic = [ int(_) for _ in file.readline()[0] ]
-                if nodes[output].logic is [1,1]:
-                    nodes[output].node_type = NT_AND
-                if nodes[output].logic is [0,1]:
-                    nodes[output].node_type = NT_LN
-                if nodes[output].logic is [1,0]:
-                    nodes[output].node_type = NT_RN
-                if nodes[output].logic is [0,0]:
-                    nodes[output].node_type = NT_LRN
+                if len(line[1:]) is 3:
+                    nodes[output].logic = [ int(_) for _ in file.readline()[0] ]
+                    if nodes[output].logic is [1,1]:
+                        nodes[output].node_type = NT_AND
+                    if nodes[output].logic is [0,1]:
+                        nodes[output].node_type = NT_LN
+                    if nodes[output].logic is [1,0]:
+                        nodes[output].node_type = NT_RN
+                    if nodes[output].logic is [0,0]:
+                        nodes[output].node_type = NT_LRN
         # second run: initialize all the connections
         file.seek(0)
         while True:
@@ -319,20 +330,45 @@ class Graph_box:
             if line[0] == '.end':
                 break
             elif line[0] == '.names':
-                left, right, output = line[1:]
-                nodes[left].fanouts.append(nodes[output])
-                nodes[right].fanouts.append(nodes[output])
-                self.add_connection(nodes[left] , nodes[output])
-                self.add_connection(nodes[right], nodes[output])
-                nodes[output].fanin_left  = nodes[left]
-                nodes[output].fanin_right = nodes[right]
-                placeholder = file.readline()
+                '''
+                    There are 3 kinds of nodes:
+                        1. constant: [IGNORE]
+                        2. wire: [IGNORE]
+                        3. wire:
+                '''
+                if len(line[1:]) is 1:
+                    # set the logic to None
+                    nodes[output].logic = None
+                if len(line[1:]) is 2:
+                    # add a wire
+                    input_node, output = line[1:]
+                    left = right = input_node
+                    nodes[left].fanouts.append(nodes[output])
+                    nodes[right].fanouts.append(nodes[output])
+                    self.add_connection(nodes[left] , nodes[output])
+                    self.add_connection(nodes[right], nodes[output])
+                    nodes[output].fanin_left  = nodes[left]
+                    nodes[output].fanin_right = nodes[right]
+                    placeholder = file.readline()
+                if len(line[1:]) is 3:
+                    # add a AND node
+                    left, right, output = line[1:]
+                    nodes[left].fanouts.append(nodes[output])
+                    nodes[right].fanouts.append(nodes[output])
+                    self.add_connection(nodes[left] , nodes[output])
+                    self.add_connection(nodes[right], nodes[output])
+                    nodes[output].fanin_left  = nodes[left]
+                    nodes[output].fanin_right = nodes[right]
+                    placeholder = file.readline()
             else:
                 continue
         file.close()
         # zoom to be able to host all the nodes
         graph_level = 0
         for output in outputs:
+            # quit is output is deleted:
+            if output not in nodes:
+                continue
             root = nodes[output]
             graph_level = max(graph_level, self.assign_level(root))
         self.max_level = max(6, graph_level+2)
@@ -343,6 +379,9 @@ class Graph_box:
         # assign position
         self.grid_memory = []
         for output in outputs:
+            # quit is output is deleted:
+            if output not in nodes:
+                continue
             root = nodes[output]
             self.assign_grid_position(root, [round(grid_width/2), 1]) # in the middle of first row
         
