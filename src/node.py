@@ -14,6 +14,7 @@ class Node(object):
         self.endanger = False
         self.level = None
         self.node_type = node_type
+        self.grid_position = [] # the position on the graph box grid
 
     def is_over(self, position):
         x, y = position

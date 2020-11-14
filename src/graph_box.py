@@ -22,6 +22,7 @@ class Graph_box:
         self.position = self.left, self.top
         
         self.max_level = 10
+        self.grid_size = max(1,int(self.height/self.max_level))
         self.node_size = int(self.height/self.max_level)/3
         self.area = 0
         self.moving_node = None
@@ -75,19 +76,19 @@ class Graph_box:
         
 
         # paint grid
-        grid_size = int(self.height/self.max_level)
-        grid_width = int(self.width/grid_size)
-        grid_height = int(self.height/grid_size)
+        self.grid_size = max(1,int(self.height/self.max_level))
+        grid_width = int(self.width/self.grid_size)
+        grid_height = int(self.height/self.grid_size)
         for _ in range(grid_height+1):
             start, end = [
-                (self.left, self.top+_*grid_size),
-                (self.left+self.width, self.top+_*grid_size)
+                (self.left, self.top+_*self.grid_size),
+                (self.left+self.width, self.top+_*self.grid_size)
             ]
             pygame.draw.line(screen, GRAY, start, end, 2)
         for _ in range(grid_width+1):
             start, end = [
-                (self.left+_*grid_size, self.top),
-                (self.left+_*grid_size, self.top+self.height)
+                (self.left+_*self.grid_size, self.top),
+                (self.left+_*self.grid_size, self.top+self.height)
             ]
             pygame.draw.line(screen, GRAY, start, end, 2)
         """
@@ -118,21 +119,24 @@ class Graph_box:
         screen.blit(text_rect2, position2)
 
     def zoom_to(self, level):
-        old_grid_size = max(1,int(self.height/self.max_level))
         self.max_level = level
         self.node_size = int(self.height/self.max_level)/3
-        new_grid_size = max(1,int(self.height/self.max_level))
+        self.grid_size = max(1,int(self.height/self.max_level))
         # round it to the closest grid point
         for node in self.nodes:
-            x, y = node.position
+            if node.position is [0, 0]:
+                continue
+            if node.grid_position is None:
+                continue
+            x, y = node.grid_position
             grid_position = [
-                round((x-self.left)/old_grid_size)*new_grid_size+self.left,
-                round((y-self.top)/old_grid_size)*new_grid_size+self.top
+                x*self.grid_size+self.left,
+                y*self.grid_size+self.top
             ]
-            node.position = grid_position
+            node.position = node.x, node.y = grid_position
 
     def zoom_in(self):
-        if self.max_level == 0:
+        if self.max_level == 3:
             return
         self.zoom_to(self.max_level-1)
 
@@ -147,13 +151,18 @@ class Graph_box:
             node_type = self.node_type
         )
 
+        # assign the grid position to the node
+        x, y = position
+        node.grid_position = (x-self.left)/self.grid_size, (y-self.top)/self.grid_size
+
         self.nodes.append(node)
         self.area += 1
         return node
 
     def add_empty_node(self):
-        node = self.add_node([0, 0])
+        node = self.add_node(position=[0, 0])
         node.logic = None
+        node.grid_position = None
         return node
 
     def delete_node(self, node):
@@ -214,32 +223,47 @@ class Graph_box:
             find an empty place to store this node which is 
             the closest to current location
         '''
-        # use BFS to find the next position
-        queue_of_points = queue.Queue() 
-        queue_of_points.put(current_location)
+        # return if a node already got its position
         x, y = current_location
-        while queue_of_points.empty() is False:
-            point = x, y = queue_of_points.get()
-            # if an empty point is found
-            if point not in self.grid_memory:
-                self.grid_memory.append( point )
-                break
-            '''
-                Don't change the sequence here. If all of the surroundings are empty:
-                    1. Down 2. Right 3. Left 4. Up
-            '''
-            if True:    # no restrictions on y max value
-                if [x,y+1] not in self.grid_memory:
-                    queue_of_points.put([x,y+1])
-            if True:    # no restrictions on x max value
-                if [x+1,y] not in self.grid_memory:
-                    queue_of_points.put([x+1,y])
-            if x > 1:   # x should be positive
-                if [x-1,y] not in self.grid_memory:
-                    queue_of_points.put([x-1,y])
-            if y > 1:   # y should be positive
-                if [x,y-1] not in self.grid_memory:
-                    queue_of_points.put([x,y-1])
+        if node.position != [0, 0]:
+            return 
+        if node.position == [0, 0]:
+            # use BFS to find the next position
+            queue_of_points = queue.Queue()
+            trace_memory = []
+            queue_of_points.put([x, y])
+            trace_memory.append([x,y])
+            while queue_of_points.empty() is False:
+                point = x, y = queue_of_points.get()
+                # if an empty point is found
+                if point not in self.grid_memory:
+                    node.grid_position = x, y
+                    node.position = node.x, node.y = [
+                        x*self.grid_size+self.left,
+                        y*self.grid_size+self.top
+                    ]
+                    self.grid_memory.append( point )
+                    break
+                '''
+                    Don't change the sequence here. If all of the surroundings are empty:
+                        1. Down 2. Right 3. Left 4. Up
+                '''
+                if True:    # no restrictions on y max value
+                    if [x,y+1] not in trace_memory:
+                        queue_of_points.put([x,y+1])
+                        trace_memory.append([x,y+1])
+                if True:    # no restrictions on x max value
+                    if [x+1,y] not in trace_memory:
+                        queue_of_points.put([x+1,y])
+                        trace_memory.append([x+1,y])
+                if x > 1:   # x should be positive
+                    if [x-1,y] not in trace_memory:
+                        queue_of_points.put([x-1,y])
+                        trace_memory.append([x-1,y])
+                if y > 1:   # y should be positive
+                    if [x,y-1] not in trace_memory:
+                        queue_of_points.put([x,y-1])
+                        trace_memory.append([x,y-1])
         # adjust the level if necessary
         if y > self.max_level:
             self.zoom_to(y)
@@ -248,14 +272,9 @@ class Graph_box:
         '''
             set the value to the attributes and run the recursion
         '''
-        grid_size = int(self.height/self.max_level)
-        node.position = node.x, node.y = [
-            x*grid_size+self.left,
-            y*grid_size+self.top
-        ]
         if node.fanin_left is not None:
             self.assign_grid_position(node.fanin_left, [x-1,y+1])
-        if node.fanin_left is not None:
+        if node.fanin_right is not None:
             self.assign_grid_position(node.fanin_right, [x+1,y+1])
 
     def read_blif(self, filename):
@@ -377,14 +396,14 @@ class Graph_box:
                 continue
             root = nodes[output]
             self.assign_grid_position(root, [2, 1]) # in the middle of first row
-        
+
     def write_blif(self, filename):
         file = open(filename,'w')
         # set input and output
         inputs = []
         outputs = []
         nodes = []
-        # label all inputs
+        # label all inputs  
         for node in self.nodes:
             if node.fanin_right == None and node.fanin_left == None:
                 if len(node.fanouts) == 0:
@@ -438,11 +457,11 @@ class Graph_box:
         if self.is_over(position) is False:
             return None
         x, y = position
-        grid_size = int(self.height/self.max_level)
+        self.grid_size = max(1,int(self.height/self.max_level))
         # round it to the closest grid point
         grid_position = [
-            round((x-self.left)/grid_size)*grid_size+self.left,
-            round((y-self.top)/grid_size)*grid_size+self.top
+            round((x-self.left)/self.grid_size)*self.grid_size+self.left,
+            round((y-self.top)/self.grid_size)*self.grid_size+self.top
         ]
         # if not empty then select that node
         for node in self.nodes:
@@ -459,11 +478,11 @@ class Graph_box:
         if self.moving_node is None:
             return
         x, y = position
-        grid_size = int(self.height/self.max_level)
+        self.grid_size = max(1,int(self.height/self.max_level))
         # round it to the closest grid point
         grid_position = [
-            round((x-self.left)/grid_size)*grid_size+self.left,
-            round((y-self.top)/grid_size)*grid_size+self.top
+            round((x-self.left)/self.grid_size)*self.grid_size+self.left,
+            round((y-self.top)/self.grid_size)*self.grid_size+self.top
         ]
         self.moving_node.move_to(grid_position)
         self.moving_node.highlight = False
@@ -475,11 +494,11 @@ class Graph_box:
             return None
         # if not empty then select that node
         x, y = position
-        grid_size = int(self.height/self.max_level)
+        self.grid_size = max(1,int(self.height/self.max_level))
         # round it to the closest grid point
         grid_position = [
-            round((x-self.left)/grid_size)*grid_size+self.left,
-            round((y-self.top)/grid_size)*grid_size+self.top
+            round((x-self.left)/self.grid_size)*self.grid_size+self.left,
+            round((y-self.top)/self.grid_size)*self.grid_size+self.top
         ]
         for node in self.nodes:
             if node.is_over(grid_position):
@@ -492,11 +511,11 @@ class Graph_box:
         if self.endanger_node is None:
             return
         x, y = position
-        grid_size = int(self.height/self.max_level)
+        self.grid_size = max(1,int(self.height/self.max_level))
         # round it to the closest grid point
         grid_position = [
-            round((x-self.left)/grid_size)*grid_size+self.left,
-            round((y-self.top)/grid_size)*grid_size+self.top
+            round((x-self.left)/self.grid_size)*self.grid_size+self.left,
+            round((y-self.top)/self.grid_size)*self.grid_size+self.top
         ]
         for node in self.nodes:
             if node.is_over(grid_position):
@@ -518,11 +537,11 @@ class Graph_box:
 
     def on_mouse_moving(self, position):
         x, y = position
-        grid_size = int(self.height/self.max_level)
+        self.grid_size = max(1,int(self.height/self.max_level))
         # round it to the closest grid point
         grid_position = [
-            round((x-self.left)/grid_size)*grid_size+self.left,
-            round((y-self.top)/grid_size)*grid_size+self.top
+            round((x-self.left)/self.grid_size)*self.grid_size+self.left,
+            round((y-self.top)/self.grid_size)*self.grid_size+self.top
         ]
         # initilize
         for node in self.nodes:
