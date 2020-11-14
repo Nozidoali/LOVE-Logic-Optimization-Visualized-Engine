@@ -226,10 +226,7 @@ class Graph_box:
                 break
             '''
                 Don't change the sequence here. If all of the surroundings are empty:
-                    1. Down
-                    2. Right
-                    3. Left
-                    4. Up
+                    1. Down 2. Right 3. Left 4. Up
             '''
             if True:    # no restrictions on y max value
                 if [x,y+1] not in self.grid_memory:
@@ -304,20 +301,20 @@ class Graph_box:
                     pass
                 if len(line[1:]) is 2:
                     nodes[output].logic = [ int(_) for _ in file.readline()[0] ]
-                    if nodes[output].logic is [1]:
+                    if nodes[output].logic == [1]:
                         nodes[output].node_type = NT_AND
-                    if nodes[output].logic is [0]:
+                    if nodes[output].logic == [0]:
                         nodes[output].node_type = NT_LRN
                 # should be <0/1><0/1> 1
                 if len(line[1:]) is 3:
-                    nodes[output].logic = [ int(_) for _ in file.readline()[0] ]
-                    if nodes[output].logic is [1,1]:
+                    nodes[output].logic = [ int(_) for _ in file.readline().split()[0] ]
+                    if nodes[output].logic == [1,1]:
                         nodes[output].node_type = NT_AND
-                    if nodes[output].logic is [0,1]:
+                    if nodes[output].logic == [0,1]:
                         nodes[output].node_type = NT_LN
-                    if nodes[output].logic is [1,0]:
+                    if nodes[output].logic == [1,0]:
                         nodes[output].node_type = NT_RN
-                    if nodes[output].logic is [0,0]:
+                    if nodes[output].logic == [0,0]:
                         nodes[output].node_type = NT_LRN
         # second run: initialize all the connections
         file.seek(0)
@@ -371,10 +368,6 @@ class Graph_box:
                 continue
             root = nodes[output]
             graph_level = max(graph_level, self.assign_level(root))
-        self.max_level = max(6, graph_level+2)
-        grid_size   = int(self.height/self.max_level)
-        grid_width  = int(self.width/grid_size)
-        grid_height = int(self.height/grid_size)
 
         # assign position
         self.grid_memory = []
@@ -383,7 +376,7 @@ class Graph_box:
             if output not in nodes:
                 continue
             root = nodes[output]
-            self.assign_grid_position(root, [round(grid_width/2), 1]) # in the middle of first row
+            self.assign_grid_position(root, [2, 1]) # in the middle of first row
         
     def write_blif(self, filename):
         file = open(filename,'w')
