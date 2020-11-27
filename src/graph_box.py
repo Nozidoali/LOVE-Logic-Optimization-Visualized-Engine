@@ -144,14 +144,7 @@ class Graph_box:
             if node.logic is None or not node.logic:
                 area -= 1
         text_rect3 = font2.render('{0}'.format(area), True, WHITE, None)
-        if area < 10:
-            position3 = self.left+self.width+240, self.top+70
-        elif 9 < area < 100:
-            position3 = self.left+self.width+200, self.top+70
-        elif 99 <area < 1000:
-            position3 = self.left+self.width+160, self.top+70
-        elif  area >= 1000:
-            position3 = self.left+self.width+120, self.top+70
+        position3 = self.left+self.width-math.floor(math.log10(area))*40+240, self.top+70
         
         text_rect4 = font1.render('Area:', True, WHITE, None)
         position4 = self.left+self.width+180, self.top-20

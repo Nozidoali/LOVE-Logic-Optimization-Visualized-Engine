@@ -6,6 +6,7 @@ import sys
 from pygame.locals import *
 # import tkinter as tk
 import queue 
+import time
 
 WHITE =         (255,   255,    255)
 GRAY =          (128,   128,    128)

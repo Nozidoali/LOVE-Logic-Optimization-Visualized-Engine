@@ -7,7 +7,8 @@ if __name__ == '__main__':
     # you need to define your UI
     ui = UI(
         background='img/background.jpg',
-        version='3.0'
+        version='3.0',
+        fullscreen=False
     )
 
     # Add a monitor
@@ -50,6 +51,13 @@ if __name__ == '__main__':
     # Add and_LRn button
     ui.add_object(Button(left=0.012, top=0.60, height=0.12, width=0.071, text = 'LRn'))
 
-    
-    ui.run()
+    # define your warmup operations
+    read_file_operation = SIG_READ_FILE, 'ctrl.blif'
+    run_sa_operation = SIG_OPT, ''
+
+    warmup_operations = [read_file_operation]
+    for _ in range(1000):
+        warmup_operations.append(run_sa_operation)
+
+    ui.run(warmup=warmup_operations)
     #print(pygame.font.get_fonts())

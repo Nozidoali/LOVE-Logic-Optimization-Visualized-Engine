@@ -8,7 +8,7 @@ class Optimizer:
         self.directory = directory
         self.file_path = file_path
         self.type = TYPE_OPTIMIZER
-        self.temperature = 0
+        self.temperature = 1
         if not os.path.exists(directory):
             os.mkdir(directory)
 
@@ -45,7 +45,8 @@ class sa_Optimizer(Optimizer):
     def run(self, command: str):
         self.temperature *= 0.99
         sa_commands = self.file_path, '-f', '{}/curr.blif'.format(self.directory), '-t', str(self.temperature), '-o', '{}/curr.blif'.format(self.directory), '-r', command
-        subprocess.run(sa_commands)
+        process = subprocess.Popen(sa_commands)
+        process.wait()
 
 class abc_Optimizer(Optimizer):
 
@@ -61,7 +62,8 @@ class abc_Optimizer(Optimizer):
             command,
             'write_blif {}/curr.blif'.format(self.directory)
         ])
-        subprocess.run(abc_commands)
+        process = subprocess.Popen(abc_commands)
+        process.wait()
     
     def undo(self):
         '''

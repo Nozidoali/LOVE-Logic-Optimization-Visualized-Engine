@@ -7,7 +7,7 @@ from src.opt_engine import *
 from src.benchmark import *
 
 class UI(object):
-    def __init__(self, background='img/background.jpg', version='unknown'):
+    def __init__(self, background='img/background.jpg', version='unknown', fullscreen = True):
         '''
         1. initialize the screen
         2. set the width and hight
@@ -28,7 +28,7 @@ class UI(object):
         self.size = infoObject.current_w, infoObject.current_h
         self.version = version
         
-        self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN) if fullscreen else pygame.display.set_mode(self.size)
         self.background = pygame.image.load(background)
         pygame.display.set_caption('VE450 Demo: {0}'.format(self.version))
         """
@@ -83,7 +83,6 @@ class UI(object):
         '''
         if command is None:
             return
-
         
         # SIG_SYS_QUIT
         if command[0] == SIG_SYS_QUIT:
@@ -116,6 +115,7 @@ class UI(object):
                     graph_box.area = 0
                     # read the result
                     graph_box.read_blif('{}/curr.blif'.format(optimizer.directory))
+        
         # SIG_UNDO
         if command[0] == SIG_UNDO:
             graph_box = self.get_graph_box()
@@ -240,10 +240,17 @@ class UI(object):
 
         pygame.display.flip()
 
-    def run(self):
+    def run(self, warmup = []):
         '''
         the main function of UI
         '''
+        # pre-defined operation sequence
+        for operation in warmup:
+            signal = operation
+            self.parse_command(signal)
+            self.paint()
+
+        # listen to the user's call
         while(True):
             signal = self.get_signal()
             self.parse_command(signal)
