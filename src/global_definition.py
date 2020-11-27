@@ -4,7 +4,7 @@ import subprocess
 import os
 import sys
 from pygame.locals import *
-import tkinter as tk
+# import tkinter as tk
 import queue 
 
 WHITE =         (255,   255,    255)
@@ -20,7 +20,7 @@ GRID =          (105,   105,    105)
 YELLOW =        (255,   255,    0)
 FB =            (255,   48,     48)
 PINK1 =         (255,   181,    197)
-PINK =          (255,   182,    193)
+PINK =          (255,   182,    193,70)
 BB =            (192,   203,    216, 70)
 BY =            (88,    112,    144, 110)
 SB =            (129,   150,    177, 90)
@@ -40,7 +40,7 @@ Cu =            (233,   236,    239, 70)
 BC =            (92,    103,    125, 90)
 Ma =            (151,   157,    172, 90)
 
-VERSION = 1.0
+VERSION = 3.9
 GUI_NAME = 'Logic Optimization Visualized Engine'
 AUTHOR = 'why'
 
@@ -57,6 +57,7 @@ SIG_AND = 6
 SIG_LEN = 7
 SIG_RIN = 8
 SIG_LRN = 9
+SIG_UNDO = 10
 
 '''
     types
@@ -68,6 +69,7 @@ TYPE_BUTTON = 2
 TYPE_MOUSE_CURSOR = 3
 TYPE_OPTIMIZER = 4
 TYPE_COUNT_BOX = 5
+TYPE_BENCHMARK = 6
 
 '''
     node types
@@ -80,10 +82,10 @@ NT_LRN  = 3
 '''
     color theme
 '''
-COLOR_EDGE_HIGHLIGHT =  [255, 255, 255]
+COLOR_EDGE_HIGHLIGHT =  [255,   182,    193]
 COLOR_EDGE_ENDANGER =   [255,   0,   0]
-COLOR_EDGE_NORMAL =     [100, 100, 100]
+COLOR_EDGE_NORMAL =     [128,   128,    128]
 
-COLOR_NODE_HIGHLIGHT =  [255, 255, 255]
+COLOR_NODE_HIGHLIGHT =  [255,   182,    193]
 COLOR_NODE_ENDANGER =   [255,   0,   0]
-COLOR_NODE_NORMAL =     [200, 200, 200]
+COLOR_NODE_NORMAL =     [255,   255,    255]

@@ -3,6 +3,7 @@ from src.global_definition import *
 class Text_box:
     def __init__(self, left, top, width, height):
         # get the window DPI and set the size of box
+        """
         root = tk.Tk()
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
@@ -10,7 +11,7 @@ class Text_box:
         infoObject = pygame.display.Info()
         screen_width = infoObject.current_w
         screen_height = infoObject.current_h
-        """
+        
         
         # initialize the window:
         self.width = width if type(width) is int else int(screen_width*width) +20
@@ -19,12 +20,12 @@ class Text_box:
         self.top = top if type(top) is int else int(screen_height*top)
         self.position = self.left, self.top
         
-        self.max_line = 10
+        self.max_line = 13
         self.text_buffer = [
             '=== Textbox Initialization ===',
-            '  Hi! This is {0}, ver: {1}'.format(GUI_NAME, VERSION),
-            '  The demo is successfully initialized.  ',
-            '  Now you can use the textbox  ',
+            'Hi! This is {0}, ver: {1}'.format(GUI_NAME, VERSION),
+            'The demo is successfully initialized.  ',
+            'Now you can use the textbox  ',
         ]
         self.input_buffer = ''
         self.type = TYPE_TEXT_BOX
@@ -45,24 +46,26 @@ class Text_box:
         return True
 
     def zoom_in(self):
-        if self.max_line > 1:
+        if 20 > self.max_line > 13:
             self.max_line -= 1
 
     def zoom_out(self):
-        if self.max_line < 20:
+        if 13< self.max_line < 20:
             self.max_line += 1
 
     def paint(self, screen):
         '''
         paint the object
         '''
-        font_size = math.floor((self.height-50)/(self.max_line))
+        font_size = math.floor((self.height-70)/(self.max_line))+5
         pygame.draw.rect(screen, GRAY, Rect(
             self.left-10, self.top-10, self.width+20, self.height+20), 2)
+        pygame.gfxdraw.box(screen, pygame.Rect(
+            self.left-10, self.top-10, self.width+20, self.height+20), BB)
         offset = 0
         line_number = 0
         # paint all the text
-        font = pygame.font.SysFont('rachana', font_size)
+        font = pygame.font.SysFont('microsoftsansserifttf', font_size-3)
         #font.set_bold(True)
         
         for text in self.text_buffer:
@@ -129,7 +132,7 @@ class Text_box:
         # reserve 1 line for the input display
         if len(self.text_buffer) == self.max_line-1:
             self.text_buffer = self.text_buffer[1:]
-        self.text_buffer.append('     '+string)
+        self.text_buffer.append(string)
 
     def insert_log(self, string):
         # reserve 1 line for the input display
@@ -145,9 +148,16 @@ class Text_box:
     def print_help(self):
         help_text = [
             '=== HELP TEXT ===',
-            'Hi! This is {0}, ver: {1}, looking for help?'.format(GUI_NAME, VERSION),
-            '    Mouse LeftClick: create a new node or drag an existing node.',
-            '    Mouse RightClick: delete a node or drag to link two nodes'
+            'Hi! Looking for help?',
+            'Mouse Left: create a new node or drag an existing node',
+            'Mouse Right: delete a node or drag to link two nodes',
+            'Mouse Wheel: zoom in and out',
+            'Keyboard ESC: exit the engine',
+            'Run: start the optimization engine',
+            'Undo: go back the optimization process for one step',
+            'Clear: clear the whole node grid',
+            'Benchmark: type a number from 1-20 to load the test file',
+            'Please connect all the inputs before you RUN!'
         ]
         for text in help_text:
             self.insert_text(text)

@@ -5,14 +5,15 @@ import pygame.gfxdraw
 class Graph_box:
     def __init__(self, left, top, width, height):
         # get the window DPI and set the size of box
+        """
         root = tk.Tk()
         self.screen_width = root.winfo_screenwidth()
         self.screen_height = root.winfo_screenheight()
         """
         infoObject = pygame.display.Info()
-        screen_width = infoObject.current_w
-        screen_height = infoObject.current_h
-        """
+        self.screen_width = infoObject.current_w
+        self.screen_height = infoObject.current_h
+        
         
         # initialize the window:
         self.width = width if type(width) is int else int(self.screen_width*width)
@@ -53,26 +54,32 @@ class Graph_box:
         """
         # paint background of multiple colors
         pygame.gfxdraw.box(screen, pygame.Rect(
-            0, 0, self.left - 10, self.screen_height), BB)
+            0, 0, self.left - 20, self.screen_height), SB)
 
         pygame.gfxdraw.box(screen, pygame.Rect(
-            self.left - 10, 0, self.width + 20, self.screen_height), BC)
+            self.left - 20, 0, self.width + 40, self.screen_height), BC)
 
         pygame.gfxdraw.box(screen, pygame.Rect(
-            self.left + self.width + 10, 0, self.screen_width - (self.left + self.width + 20), self.screen_height), SB)
+            self.left + self.width + 20, 0, self.screen_width - (self.left + self.width + 10), self.screen_height), SB)
 
         # paint borders
         leg1_start, leg1_end = [
-            (self.left - 10, 0),
-            (self.left - 10, self.screen_height),
+            (self.left - 20, 0),
+            (self.left - 20, self.screen_height+10),
         ]
-        pygame.draw.line(screen, GRAY, leg1_start, leg1_end, 2)
+        pygame.draw.line(screen, GRAY, leg1_start, leg1_end, 1)
 
         leg2_start, leg2_end = [
-            (self.left + self.width + 10, 0),
-            (self.left + self.width + 10, self.screen_height),
+            (self.left + self.width + 20, 0),
+            (self.left + self.width + 20,self.screen_height+10)
         ]
-        pygame.draw.line(screen, GRAY, leg2_start, leg2_end, 2)
+        pygame.draw.line(screen, GRAY, leg2_start, leg2_end, 1)
+        
+        leg3_start, leg3_end = [
+            (self.left + self.width , self.top),
+            (self.left + self.width , self.top + self.height),
+        ]
+        pygame.draw.line(screen, GRAY, leg3_start, leg3_end, 1)
         
 
         # paint grid
@@ -84,13 +91,13 @@ class Graph_box:
                 (self.left, self.top+_*self.grid_size),
                 (self.left+self.width, self.top+_*self.grid_size)
             ]
-            pygame.draw.line(screen, GRAY, start, end, 2)
+            pygame.draw.line(screen, GRAY, start, end, 1)
         for _ in range(grid_width+1):
             start, end = [
                 (self.left+_*self.grid_size, self.top),
                 (self.left+_*self.grid_size, self.top+self.height)
             ]
-            pygame.draw.line(screen, GRAY, start, end, 2)
+            pygame.draw.line(screen, GRAY, start, end, 1)
         """
         # paint boundary
         pygame.draw.rect(screen, GRAY, Rect(
@@ -104,19 +111,56 @@ class Graph_box:
             node.paint(screen, self.node_size)
 
         # paint count board
-        #pygame.draw.rect(screen, BB, Rect(
+        # pygame.draw.rect(screen, BB, Rect(
         #    self.left + self.width + 200, self.top - 10, 150, 200))
+	
         pygame.gfxdraw.rectangle(screen, Rect(
-            self.left + self.width + 350, self.top - 10, 350, 300),BB)
+            self.left + self.width + 110, self.top - 10, 350, 290),BB)
+        pygame.gfxdraw.box(screen, pygame.Rect(
+            self.left + self.width + 110, self.top - 10, 350, 290), BB)
         font_size = int(self.height*0.1)
-        font1 = pygame.font.SysFont('comicsansms', font_size)
-        font2 = pygame.font.SysFont('comicsansms', font_size*2)
+        font1 = pygame.font.SysFont('comicsansmsttf', font_size)
+        font2 = pygame.font.SysFont('comicsansmsttf', font_size*2)
+
+	# number of nodes
+        """
         text_rect1 = font2.render('{0}'.format(self.area), True, WHITE, None)
-        position1 = self.left+self.width+453, self.top-35
-        text_rect2 = font1.render('Nodes', True, WHITE, None)
-        position2 = self.left+self.width+383, self.top+155
-        screen.blit(text_rect1, position1)
-        screen.blit(text_rect2, position2)
+        if self.area < 10:
+            position1 = self.left+self.width+240, self.top+70
+        elif 9 < self.area < 100:
+            position1 = self.left+self.width+200, self.top+70
+        elif 99 <self.area < 1000:
+            position1 = self.left+self.width+160, self.top+70
+        elif  self.area >= 1000:
+            position1 = self.left+self.width+120, self.top+70
+
+        text_rect2 = font1.render('Nodes:', True, WHITE, None)
+        position2 = self.left+self.width+180, self.top-20
+	"""
+
+	# area
+        area = self.area
+        for node in self.nodes:
+            if node.logic is None or not node.logic:
+                area -= 1
+        text_rect3 = font2.render('{0}'.format(area), True, WHITE, None)
+        if area < 10:
+            position3 = self.left+self.width+240, self.top+70
+        elif 9 < area < 100:
+            position3 = self.left+self.width+200, self.top+70
+        elif 99 <area < 1000:
+            position3 = self.left+self.width+160, self.top+70
+        elif  area >= 1000:
+            position3 = self.left+self.width+120, self.top+70
+        
+        text_rect4 = font1.render('Area:', True, WHITE, None)
+        position4 = self.left+self.width+180, self.top-20
+		
+
+        #screen.blit(text_rect1, position1)
+        #screen.blit(text_rect2, position2)
+        screen.blit(text_rect3, position3)
+        screen.blit(text_rect4, position4)
 
     def zoom_to(self, level):
         self.max_level = level
@@ -191,6 +235,16 @@ class Graph_box:
         )
         lower_node.edges.append(edge)
         higher_node.edges.append(edge)
+        
+        if higher_node.node_type == NT_AND:
+            higher_node.logic = [1,1]
+        if higher_node.node_type == NT_LN:
+            higher_node.logic = [0,1]
+        if higher_node.node_type == NT_RN:
+            higher_node.logic = [1,0]
+        if higher_node.node_type == NT_LRN:
+            higher_node.logic = [0,0]
+
         if edge not in self.connnections:
             self.connnections.append(edge)
         return True
@@ -207,6 +261,8 @@ class Graph_box:
                 edge.higher_node.fanin_left = None
             if edge.pin_index == 2:
                 edge.higher_node.fanin_right = None
+            if edge.higher_node.fanin_left is None and edge.higher_node.fanin_right is None:
+                edge.higher_node.logic = None
 
     def assign_level(self, node):
         # if reached the leaf

@@ -3,6 +3,7 @@ from src.global_definition import *
 class Count_box:
     def __init__(self, left, top, width, height, text):
         # get the window DPI and set the size of box
+        """
         root = tk.Tk()
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
@@ -10,7 +11,7 @@ class Count_box:
         infoObject = pygame.display.Info()
         screen_width = infoObject.current_w
         screen_height = infoObject.current_h
-        """
+        
         
         # initialize the window:
         self.width = width if type(width) is int else int(screen_width*width)

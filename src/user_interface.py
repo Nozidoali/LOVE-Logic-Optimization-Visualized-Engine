@@ -4,9 +4,10 @@ from src.count_box import *
 from src.button import *
 from src.mouse_cursor import *
 from src.opt_engine import *
+from src.benchmark import *
 
 class UI(object):
-    def __init__(self, background='img/background.jpg', version='unknown', fullscreen=True):
+    def __init__(self, background='img/background.jpg', version='unknown'):
         '''
         1. initialize the screen
         2. set the width and hight
@@ -16,17 +17,18 @@ class UI(object):
             - network graphbox
         '''
         pygame.init()
-
+        """
         root = tk.Tk()
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
         self.size = screen_width, screen_height
-
-        #infoObject = pygame.display.Info()
-        #self.size = infoObject.current_w, infoObject.current_h
-
+        """
+        infoObject = pygame.display.Info()
+        # toggle = pygame.display.toggle_fullscreen()
+        self.size = infoObject.current_w, infoObject.current_h
         self.version = version
-        self.screen = pygame.display.set_mode(self.size, flags = pygame.FULLSCREEN) if fullscreen else pygame.display.set_mode(self.size)
+        
+        self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
         self.background = pygame.image.load(background)
         pygame.display.set_caption('VE450 Demo: {0}'.format(self.version))
         """
@@ -47,6 +49,7 @@ class UI(object):
             4. Mouse Cursor  
             5. Optimizer  
             6. Count Box
+            7. Benchmark
         '''
         self.objects.append(obj)
     
@@ -108,35 +111,49 @@ class UI(object):
                     # store the old network
                     graph_box.write_blif('{}/curr.blif'.format(optimizer.directory))
                     # run optimize
-                    optimizer.run('compress2rs')
+                    optimizer.run('rw')
                     # clear area
                     graph_box.area = 0
                     # read the result
                     graph_box.read_blif('{}/curr.blif'.format(optimizer.directory))
-
-        #SIG_CLR
+        # SIG_UNDO
+        if command[0] == SIG_UNDO:
+            graph_box = self.get_graph_box()
+            if graph_box is not None: 
+                # optimizer
+                optimizer = self.get_optimizer()
+                if optimizer is not None:
+                    # store the old network
+                    graph_box.write_blif('{}/curr.blif'.format(optimizer.directory))
+                    # undo optimize
+                    optimizer.undo()
+                    # clear area
+                    graph_box.area = 0
+                    # read the result
+                    graph_box.read_blif('{}/curr.blif'.format(optimizer.directory))
+        # SIG_CLR
         if command[0] == SIG_CLR:
             graph_box = self.get_graph_box()
             if graph_box is not None:
                 # clear all nodes and connections
                 graph_box.clear()
         
-        #SIG_AND
+        # SIG_AND
         if command[0] == SIG_AND:
             graph_box = self.get_graph_box()
             graph_box.node_type = NT_AND
 
-        #SIG_LEN
+        # SIG_LEN
         if command[0] == SIG_LEN:
             graph_box = self.get_graph_box()
             graph_box.node_type = NT_LN
 
-        #SIG_RIN
+        # SIG_RIN
         if command[0] == SIG_RIN:
             graph_box = self.get_graph_box()
             graph_box.node_type = NT_RN
 
-        #SIG_LRN
+        # SIG_LRN
         if command[0] == SIG_LRN:
             graph_box = self.get_graph_box()
             graph_box.node_type = NT_LRN
@@ -198,11 +215,12 @@ class UI(object):
                     # right botton
                     return selected_object.on_right_up(mouse_position)
             # key board
+            
             if event.type == pygame.KEYDOWN:
                 if selected_object is None:
                     return None
                 return selected_object.on_key_down(event.key)
-
+            
     def paint(self):
         '''
         Paint all the elements on the screen, including:

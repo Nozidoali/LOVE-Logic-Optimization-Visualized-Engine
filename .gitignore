@@ -3,3 +3,5 @@ abc.rc
 tmp
 src/__pycache__
 .DS_Store
+sa
+*.blif
