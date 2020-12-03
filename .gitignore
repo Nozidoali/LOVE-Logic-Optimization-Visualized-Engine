@@ -5,3 +5,6 @@ src/__pycache__
 .DS_Store
 sa
 *.blif
+Game/main
+Game/obj/*
+bin

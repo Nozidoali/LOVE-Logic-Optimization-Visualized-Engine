@@ -115,12 +115,12 @@ class Graph_box:
         #    self.left + self.width + 200, self.top - 10, 150, 200))
 	
         pygame.gfxdraw.rectangle(screen, Rect(
-            self.left + self.width + 110, self.top - 10, 350, 290),BB)
+            self.left + self.width + 110, self.top - 10, 350, 290), BB)
         pygame.gfxdraw.box(screen, pygame.Rect(
             self.left + self.width + 110, self.top - 10, 350, 290), BB)
         font_size = int(self.height*0.1)
-        font1 = pygame.font.SysFont('comicsansmsttf', font_size)
-        font2 = pygame.font.SysFont('comicsansmsttf', font_size*2)
+        font1 = pygame.font.SysFont('comicsansms', font_size)
+        font2 = pygame.font.SysFont('comicsansms', font_size*2)
 
 	# number of nodes
         """
@@ -144,7 +144,7 @@ class Graph_box:
             if node.logic is None or not node.logic:
                 area -= 1
         text_rect3 = font2.render('{0}'.format(area), True, WHITE, None)
-        position3 = self.left+self.width-math.floor(math.log10(area))*40+240, self.top+70
+        position3 = self.left+self.width-math.floor(math.log10(area) if area>0 else 0)*40+240, self.top+70
         
         text_rect4 = font1.render('Area:', True, WHITE, None)
         position4 = self.left+self.width+180, self.top-20

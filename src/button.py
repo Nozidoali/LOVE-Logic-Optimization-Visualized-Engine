@@ -51,7 +51,7 @@ class Button(object):
         node_size = int(self.height/3.5)
         x, y = self.left + self.width/2 , self.top + self.height/2
         #pygame.draw.rect(screen, BB, Rect(
-        #    self.left, self.top, self.width, self.height))
+        #   self.left, self.top, self.width, self.height))
         #pygame.draw.rect(screen, BB, Rect(
         #   self.left, self.top, self.width, self.height),2)
         pygame.gfxdraw.rectangle(screen, Rect(
@@ -179,34 +179,34 @@ class Button(object):
             pygame.draw.line(screen, color, leg3_start, leg3_end, 3)
         
         elif (self.text == 'Run'):
-            font = pygame.font.SysFont('comicsansmsttf', font_size)
+            font = pygame.font.SysFont('comicsansms', font_size)
             text_rect = font.render(self.text, True, color, None)
             position = self.left+self.width/3.5, self.top+self.height/6-3
             screen.blit(text_rect, position)
 
         elif (self.text == 'Undo'):
-            font = pygame.font.SysFont('comicsansmsttf', font_size)
+            font = pygame.font.SysFont('comicsansms', font_size)
             text_rect = font.render(self.text, True, color, None)
             position = self.left+self.width/4, self.top+self.height/6-3
             screen.blit(text_rect, position)
         
         elif (self.text == 'Clear'):
-            font = pygame.font.SysFont('comicsansmsttf', font_size)
+            font = pygame.font.SysFont('comicsansms', font_size)
             text_rect = font.render(self.text, True, color, None)
             position = self.left+10, self.top+self.height/6-3
             screen.blit(text_rect, position)
         elif (self.text == 'Benchmark:'):
-            font = pygame.font.SysFont('comicsansmsttf', font_size-9)
+            font = pygame.font.SysFont('comicsansms', font_size-9)
             text_rect = font.render(self.text, True, color, None)
             position = self.left+40, self.top+self.height/6-3
             screen.blit(text_rect, position)
         elif (self.text == '(1-20)'):
-            font = pygame.font.SysFont('comicsansmsttf', font_size-3)
+            font = pygame.font.SysFont('comicsansms', font_size-3)
             text_rect = font.render(self.text, True, color, None)
             position = self.left+40, self.top+self.height/6-6
             screen.blit(text_rect, position)
         else:
-            font = pygame.font.SysFont('comicsansmsttf', font_size)
+            font = pygame.font.SysFont('comicsansms', font_size)
             text_rect = font.render(self.text, True, color, None)
             position = self.left+self.width/7, self.top+self.height/6
             screen.blit(text_rect, position)

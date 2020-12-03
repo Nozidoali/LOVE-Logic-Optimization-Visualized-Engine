@@ -8,7 +8,7 @@ if __name__ == '__main__':
     ui = UI(
         background='img/background.jpg',
         version='3.0',
-        fullscreen=False
+        fullscreen=True
     )
 
     # Add a monitor
@@ -27,7 +27,9 @@ if __name__ == '__main__':
     ui.add_object(Mouse_Cursor())
 
     # Add an backend engine
-    ui.add_object(sa_Optimizer(file_path='./sa', directory='./tmp'))
+    # ui.add_object(sa_Optimizer(file_path='./bin/sa', directory='./tmp'))
+    ui.add_object(user_Optimizer(file_path='./Game/sa', directory='./tmp'))
+    # ui.add_object(abc_Optimizer(file_path='./abc/abc', directory='./tmp'))
 
     # Add Run button
     ui.add_object(Button(left=0.65, top=0.4, height=0.07, width=0.1, text = 'Run'))
@@ -40,7 +42,6 @@ if __name__ == '__main__':
     # Add Benchmark button
     ui.add_object(Button(left=0.78, top=0.4, height=0.0897, width=0.2, text = 'Benchmark:'))
     ui.add_object(Button(left=0.78, top=0.49, height=0.07, width=0.2, text = '(1-20)'))
-    
    
     # Add and button
     ui.add_object(Button(left=0.012, top=0.06, height=0.12, width=0.071, text = 'And'))
@@ -52,12 +53,13 @@ if __name__ == '__main__':
     ui.add_object(Button(left=0.012, top=0.60, height=0.12, width=0.071, text = 'LRn'))
 
     # define your warmup operations
-    read_file_operation = SIG_READ_FILE, 'ctrl.blif'
+    read_file_operation = SIG_READ_FILE, '1'
     run_sa_operation = SIG_OPT, ''
 
     warmup_operations = [read_file_operation]
-    for _ in range(1000):
+    for _ in range(50):
         warmup_operations.append(run_sa_operation)
 
     ui.run(warmup=warmup_operations)
+    # ui.run()
     #print(pygame.font.get_fonts())

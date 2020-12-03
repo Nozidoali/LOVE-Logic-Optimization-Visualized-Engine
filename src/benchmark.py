@@ -53,7 +53,7 @@ class Benchmark:
             self.left, self.top, self.width, self.height), PINK)
         offset = 0
         # paint all the text
-        font = pygame.font.SysFont('comicsansmsttf', font_size-6)
+        font = pygame.font.SysFont('comicsansms', font_size-6)
         # font.set_bold(True)
         
         # paint text buffer
@@ -90,7 +90,7 @@ class Benchmark:
             # parse the command
             command = self.store_buffer()
             font_size = int(self.height*0.1)
-            font = pygame.font.SysFont('comicsansmsttf', font_size-5)
+            font = pygame.font.SysFont('comicsansms', font_size-5)
             text_rect2 = font.render(str(command), True, BY, None)
             return SIG_READ_FILE, command
         if key == pygame.K_BACKSPACE:

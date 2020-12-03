@@ -220,7 +220,7 @@ class UI(object):
                 if selected_object is None:
                     return None
                 return selected_object.on_key_down(event.key)
-            
+
     def paint(self):
         '''
         Paint all the elements on the screen, including:

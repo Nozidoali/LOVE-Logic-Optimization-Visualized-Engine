@@ -12,11 +12,10 @@ class Text_box:
         screen_width = infoObject.current_w
         screen_height = infoObject.current_h
         
-        
         # initialize the window:
-        self.width = width if type(width) is int else int(screen_width*width) +20
+        self.width = width if type(width) is int else int(screen_width*width) + 20
         self.height = height if type(height) is int else int(screen_height*height)       
-        self.left = left if type(left) is int else int(screen_width*left)- 20      
+        self.left = left if type(left) is int else int(screen_width*left) - 20      
         self.top = top if type(top) is int else int(screen_height*top)
         self.position = self.left, self.top
         

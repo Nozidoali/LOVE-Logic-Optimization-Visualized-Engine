@@ -8,10 +8,9 @@ class Optimizer:
         self.directory = directory
         self.file_path = file_path
         self.type = TYPE_OPTIMIZER
-        self.temperature = 1
+        self.temperature = 100
         if not os.path.exists(directory):
             os.mkdir(directory)
-
 
     def run():
         pass
@@ -40,12 +39,53 @@ class Optimizer:
     def on_mouse_moving(self, position):
         pass
 
+SIG_OPT_ACCEPT = 1
+SIG_OPT_REJECT = 0
+
+class user_Optimizer(Optimizer):
+
+    def run(self, node_name:str):
+
+        self.temperature *= 0.99
+
+        commands = self.file_path, '-f', '{}/curr.blif'.format(self.directory), '-t', str(self.temperature), '-o', '{}/curr.blif'.format(self.directory), '-n', node_name
+
+        # TODO: build the cpp process
+        cpp_process = Popen(commands, stdin=PIPE, stdout=PIPE)
+        stats = cpp_process.stdout.readline();
+        ngain = cpp_process.stdout.readline();
+        rewrite_node_name = cpp_process.stdout.readline();
+
+        # TODO: get the information of gain
+        print('---')
+        print('currect network: ', stats)
+        print('rewrite_node_name: ', rewrite_node_name)
+        print('gain = ', ngain, 'Accept(1)? Reject(0)?')
+        print('---')
+
+        # TODO: wait the user's feed back
+        input_signal = str(input())
+        # ? Button
+        # @param input() -> SIG
+
+        signal = SIG_OPT_ACCEPT if input_signal is '1' else SIG_OPT_REJECT
+
+        # TODO: pass the signal to the cpp process
+        if signal is SIG_OPT_ACCEPT:
+            cpp_process.stdin.write('1\n'.encode())
+            cpp_process.stdin.flush()
+        else:
+            cpp_process.stdin.write('0\n'.encode())
+            cpp_process.stdin.flush()
+        cpp_process.wait()
+
+
 class sa_Optimizer(Optimizer):
 
     def run(self, command: str):
         self.temperature *= 0.99
         sa_commands = self.file_path, '-f', '{}/curr.blif'.format(self.directory), '-t', str(self.temperature), '-o', '{}/curr.blif'.format(self.directory), '-r', command
-        process = subprocess.Popen(sa_commands)
+        process = Popen(sa_commands)
         process.wait()
 
 class abc_Optimizer(Optimizer):
@@ -62,7 +102,7 @@ class abc_Optimizer(Optimizer):
             command,
             'write_blif {}/curr.blif'.format(self.directory)
         ])
-        process = subprocess.Popen(abc_commands)
+        process = Popen(abc_commands)
         process.wait()
     
     def undo(self):
@@ -73,4 +113,5 @@ class abc_Optimizer(Optimizer):
             'read_blif {}/prev.blif'.format(self.directory),
             'write_blif {}/curr.blif'.format(self.directory)
         ])
-        subprocess.run(abc_commands)
+        run(abc_commands)
+
